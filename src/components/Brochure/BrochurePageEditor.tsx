@@ -280,8 +280,8 @@ export function BrochurePageEditor({
               disabled={!isEditable}
               placeholder={isEditable ? "Type your content here. Select text and use formatting buttons above to apply styles." : "No content added yet"}
               style={{
-                direction: 'rtl',
-                textAlign: 'right'
+                direction: 'ltr',
+                textAlign: 'left'
               }}
             />
           </div>
