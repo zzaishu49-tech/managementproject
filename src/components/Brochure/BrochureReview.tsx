@@ -66,7 +66,7 @@ export function BrochureReview() {
     switch (pageNumber) {
       case 1: return 'Project Details';
       case 2: return 'Company Information';
-      default: return `Content Page ${pageNumber - 2}`;
+      default: return Content Page ${pageNumber - 2};
     }
   };
 
@@ -148,7 +148,7 @@ export function BrochureReview() {
                   <div
                     key={project.id}
                     onClick={() => setSelectedProject(project)}
-                    className={`bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md cursor-pointer transition-all ${theme.secondary}`}
+                    className={bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md cursor-pointer transition-all ${theme.secondary}}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="font-semibold text-gray-900">Brochure Project</h4>
@@ -182,7 +182,7 @@ export function BrochureReview() {
                             className={`h-2 rounded-full transition-all duration-300 ${
                               user?.role === 'manager' ? 'bg-blue-600' : 'bg-green-600'
                             }`}
-                            style={{ width: `${progress}%` }}
+                            style={{ width: ${progress}% }}
                           />
                         </div>
                         <p className="text-xs text-gray-500">
@@ -222,7 +222,7 @@ export function BrochureReview() {
           <div className="flex items-center space-x-3">
             <span className="text-sm text-gray-600">Client: {selectedProject.client_name}</span>
             {currentPageData && (
-              <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(currentPageData.approval_status)}`}>
+              <span className={px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(currentPageData.approval_status)}}>
                 {getStatusIcon(currentPageData.approval_status)}
                 <span className="ml-2">{currentPageData.approval_status}</span>
               </span>
@@ -241,8 +241,8 @@ export function BrochureReview() {
               onClick={() => setCurrentPage(pageNum)}
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
                 currentPage === pageNum
-                  ? `${theme.primary} text-white`
-                  : `bg-white text-gray-700 border-gray-300 hover:${theme.secondary}`
+                  ? ${theme.primary} text-white
+                  : bg-white text-gray-700 border-gray-300 hover:${theme.secondary}
               }`}
             >
               {getStatusIcon(status)}
@@ -319,7 +319,7 @@ export function BrochureReview() {
                   onClick={() => setCurrentPage(pageNum)}
                   className={`w-10 h-10 rounded-lg font-medium transition-colors ${
                     currentPage === pageNum
-                      ? `${theme.primary} text-white`
+                      ? ${theme.primary} text-white
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
