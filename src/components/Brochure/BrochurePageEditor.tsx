@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrochurePage } from '../../types';
 import { 
   Upload, 
@@ -29,10 +29,11 @@ export function BrochurePageEditor({
   isEditable = true
 }: BrochurePageEditorProps) {
   const [localData, setLocalData] = useState<BrochurePage['content']>(pageData);
-  const editorRef = useRef<HTMLDivElement>(null);
+  const [textContent, setTextContent] = useState(pageData.text_content || '');
 
   useEffect(() => {
     setLocalData(pageData);
+    setTextContent(pageData.text_content || '');
   }, [pageData]);
 
   const handleInputChange = (field: string, value: any) => {
@@ -42,89 +43,139 @@ export function BrochurePageEditor({
     onDataChange(newData);
   };
 
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (!isEditable) return;
+    const value = e.target.value;
+    setTextContent(value);
+    handleInputChange('text_content', value);
+  };
+
   const applyTextFormatting = (format: string) => {
-    if (!isEditable || !editorRef.current) return;
+    if (!isEditable) return;
     
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
+    const textarea = document.querySelector('.text-editor-textarea') as HTMLTextAreaElement;
+    if (!textarea) return;
     
-    const range = selection.getRangeAt(0);
-    const selectedText = range.toString();
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textContent.substring(start, end);
     
     if (!selectedText) return;
     
-    let element: HTMLElement;
+    let formattedText = '';
     
     switch (format) {
       case 'bold':
-        element = document.createElement('strong');
+        formattedText = `**${selectedText}**`;
         break;
       case 'italic':
-        element = document.createElement('em');
+        formattedText = `*${selectedText}*`;
         break;
       case 'underline':
-        element = document.createElement('u');
+        formattedText = `__${selectedText}__`;
         break;
       case 'highlight':
-        element = document.createElement('mark');
-        element.style.backgroundColor = '#fef08a';
+        formattedText = `==${selectedText}==`;
         break;
       default:
         return;
     }
     
-    try {
-      range.deleteContents();
-      element.textContent = selectedText;
-      range.insertNode(element);
-      
-      // Clear selection
-      selection.removeAllRanges();
-      
-      // Update the data
-      handleInputChange('text_content', editorRef.current.innerHTML);
-    } catch (error) {
-      console.error('Error applying formatting:', error);
-    }
+    const newText = textContent.substring(0, start) + formattedText + textContent.substring(end);
+    setTextContent(newText);
+    handleInputChange('text_content', newText);
+    
+    // Restore cursor position
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + formattedText.length, start + formattedText.length);
+    }, 0);
   };
 
   const applyBulletPoint = () => {
-    if (!isEditable || !editorRef.current) return;
+    if (!isEditable) return;
     
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
+    const textarea = document.querySelector('.text-editor-textarea') as HTMLTextAreaElement;
+    if (!textarea) return;
     
-    const range = selection.getRangeAt(0);
-    const selectedText = range.toString();
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textContent.substring(start, end);
     
     if (selectedText) {
       const lines = selectedText.split('\n');
       const bulletedLines = lines.map(line => line.trim() ? `• ${line.replace(/^• /, '')}` : line);
+      const formattedText = bulletedLines.join('\n');
       
-      range.deleteContents();
-      const textNode = document.createTextNode(bulletedLines.join('\n'));
-      range.insertNode(textNode);
+      const newText = textContent.substring(0, start) + formattedText + textContent.substring(end);
+      setTextContent(newText);
+      handleInputChange('text_content', newText);
     } else {
       // Insert bullet point at cursor
-      const textNode = document.createTextNode('• ');
-      range.insertNode(textNode);
+      const newText = textContent.substring(0, start) + '• ' + textContent.substring(end);
+      setTextContent(newText);
+      handleInputChange('text_content', newText);
       
       // Move cursor after the bullet
-      range.setStartAfter(textNode);
-      range.setEndAfter(textNode);
-      selection.removeAllRanges();
-      selection.addRange(range);
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + 2, start + 2);
+      }, 0);
     }
-    
-    handleInputChange('text_content', editorRef.current.innerHTML);
   };
 
-  const handleEditorInput = () => {
-    if (!isEditable || !editorRef.current) return;
+  const renderFormattedText = (text: string) => {
+    if (!text) return <div className="text-gray-400 italic">Type your content here...</div>;
     
-    // Get the plain text content instead of HTML to avoid direction issues
-    const textContent = editorRef.current.innerText || editorRef.current.textContent || '';
-    handleInputChange('text_content', textContent);
+    // Split text into lines and process each line
+    const lines = text.split('\n');
+    const processedLines = lines.map((line, index) => {
+      // Handle bullet points
+      if (line.trim().startsWith('• ')) {
+        return <li key={index}>{line.replace('• ', '')}</li>;
+      }
+      
+      // Process inline formatting
+      let processedLine = line;
+      
+      // Handle bold text
+      processedLine = processedLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // Handle italic text
+      processedLine = processedLine.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      // Handle underline
+      processedLine = processedLine.replace(/__(.*?)__/g, '<u>$1</u>');
+      // Handle highlight
+      processedLine = processedLine.replace(/==(.*?)==/g, '<mark style="background-color: #fef08a;">$1</mark>');
+      
+      return (
+        <div 
+          key={index} 
+          dangerouslySetInnerHTML={{ __html: processedLine || '<br>' }}
+        />
+      );
+    });
+    
+    // Group consecutive list items
+    const groupedElements: React.ReactNode[] = [];
+    let currentList: React.ReactNode[] = [];
+    
+    processedLines.forEach((element, index) => {
+      if (React.isValidElement(element) && element.type === 'li') {
+        currentList.push(element);
+      } else {
+        if (currentList.length > 0) {
+          groupedElements.push(<ul key={`list-${index}`} className="list-disc ml-6 space-y-1">{currentList}</ul>);
+          currentList = [];
+        }
+        groupedElements.push(element);
+      }
+    });
+    
+    if (currentList.length > 0) {
+      groupedElements.push(<ul key="final-list" className="list-disc ml-6 space-y-1">{currentList}</ul>);
+    }
+    
+    return <div className="space-y-2">{groupedElements}</div>;
   };
 
   const handleFileUpload = (file: File) => {
@@ -154,19 +205,6 @@ export function BrochurePageEditor({
       </div>
     </div>
   );
-
-  // Convert HTML content back to display format
-  const getDisplayContent = () => {
-    if (!localData.text_content) return '';
-    
-    // If it's HTML content, return as is
-    if (localData.text_content.includes('<')) {
-      return localData.text_content;
-    }
-    
-    // If it's plain text, convert line breaks to <br>
-    return localData.text_content.replace(/\n/g, '<br>');
-  };
 
   return (
     <div className={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 ${!isEditable ? 'opacity-60 pointer-events-none' : ''}`}>
@@ -231,30 +269,35 @@ export function BrochurePageEditor({
           </div>
         )}
         
-        {/* Rich Text Editor */}
-        <div
-          ref={editorRef}
-          contentEditable={isEditable}
-          onInput={handleEditorInput}
-          className="w-full min-h-80 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none text-gray-700 leading-relaxed ltr-text"
-          style={{ 
-            direction: 'ltr',
-            textAlign: 'left',
-            unicodeBidi: 'normal',
-            writingMode: 'horizontal-tb',
-            whiteSpace: 'pre-wrap',
-            wordWrap: 'break-word',
-            fontFamily: 'inherit'
-          }}
-          suppressContentEditableWarning={true}
-          data-placeholder={isEditable ? "Type your content here. Select text and use formatting buttons above to apply styles." : "No content added yet"}
-        >
-          {localData.text_content || ''}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Text Input */}
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-2">Editor</label>
+            <textarea
+              className="text-editor-textarea w-full h-80 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none text-gray-700 leading-relaxed font-mono text-sm resize-none"
+              value={textContent}
+              onChange={handleTextChange}
+              disabled={!isEditable}
+              placeholder={isEditable ? "Type your content here. Select text and use formatting buttons above to apply styles." : "No content added yet"}
+              style={{
+                direction: 'ltr',
+                textAlign: 'left'
+              }}
+            />
+          </div>
+          
+          {/* Live Preview */}
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-2">Preview</label>
+            <div className="w-full h-80 px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 overflow-y-auto text-gray-700 leading-relaxed">
+              {renderFormattedText(textContent)}
+            </div>
+          </div>
         </div>
         
         {isEditable && (
           <div className="mt-2 text-xs text-gray-500">
-            <p>Select text and use formatting buttons above to apply bold, italic, underline, highlight, or bullet points</p>
+            <p>Select text in the editor and use formatting buttons to apply bold, italic, underline, highlight, or bullet points. See the live preview on the right.</p>
           </div>
         )}
       </div>
