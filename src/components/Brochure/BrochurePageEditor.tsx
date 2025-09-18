@@ -224,4 +224,4 @@ export function BrochurePageEditor({
       </div>
     </div>
   );
-}
+} 
