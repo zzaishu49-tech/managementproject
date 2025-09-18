@@ -115,7 +115,7 @@ export function BrochurePageViewer({ page, project }: BrochurePageViewerProps) {
         {getStatusBadge()}
       </div>
 
-      {/* Page Content */}
+      {/* Page Content */} 
       <div className="min-h-96">
         {hasContent() ? renderPageContent() : renderEmptyPage()}
       </div>
