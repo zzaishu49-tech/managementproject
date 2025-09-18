@@ -121,6 +121,14 @@ export function BrochurePageEditor({
 
   const handleEditorInput = () => {
     if (!isEditable || !editorRef.current) return;
+    
+    // Force text direction after input
+    if (editorRef.current) {
+      editorRef.current.style.direction = 'ltr';
+      editorRef.current.style.textAlign = 'left';
+      editorRef.current.style.unicodeBidi = 'bidi-override';
+    }
+    
     handleInputChange('text_content', editorRef.current.innerHTML);
   };
 
@@ -235,12 +243,15 @@ export function BrochurePageEditor({
           onInput={handleEditorInput}
           className="w-full min-h-80 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none text-gray-700 leading-relaxed"
           style={{ 
-            direction: 'ltr !important', 
-            textAlign: 'left !important',
-            unicodeBidi: 'embed',
+            direction: 'ltr',
+            textAlign: 'left',
+            unicodeBidi: 'bidi-override',
             writingMode: 'horizontal-tb',
             whiteSpace: 'pre-wrap',
-            wordWrap: 'break-word'
+            wordWrap: 'break-word',
+            transform: 'scaleX(1)',
+            WebkitTransform: 'scaleX(1)',
+            MozTransform: 'scaleX(1)'
           }}
           dangerouslySetInnerHTML={{ __html: getDisplayContent() }}
           data-placeholder={isEditable ? "Type your content here. Select text and use formatting buttons above to apply styles." : "No content added yet"}
