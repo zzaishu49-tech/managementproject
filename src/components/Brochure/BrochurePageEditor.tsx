@@ -10,9 +10,7 @@ import {
   Italic,
   Underline,
   Highlighter,
-  List,
-  Eye,
-  Edit
+  List
 } from 'lucide-react';
 
 interface BrochurePageEditorProps {
@@ -31,7 +29,6 @@ export function BrochurePageEditor({
   isEditable = true
 }: BrochurePageEditorProps) {
   const [localData, setLocalData] = useState<BrochurePage['content']>(pageData);
-  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     setLocalData(pageData);
@@ -211,157 +208,150 @@ export function BrochurePageEditor({
         {!isEditable && <span className="ml-2 text-sm text-yellow-600">(🔒 Locked)</span>}
       </h3>
 
-      <div className="space-y-6">
-        {/* Text Content Section */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-700 flex items-center">
-              <FileText className="w-4 h-4 mr-2" />
-              Text Content
-              {renderTooltip('Add your text content for this page')}
-            </label>
-            <button
-              type="button"
-              onClick={() => setShowPreview(!showPreview)}
-              className="flex items-center space-x-2 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-            >
-              {showPreview ? <Edit className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              <span>{showPreview ? 'Edit' : 'Preview'}</span>
-            </button>
-          </div>
-          
-          {!showPreview ? (
-            <>
-              {/* Text Formatting Toolbar */}
-              {isEditable && (
-                <div className="mb-3 flex items-center space-x-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <span className="text-xs font-medium text-gray-600">Format:</span>
-                  <button
-                    type="button"
-                    onClick={() => applyTextFormatting('bold')}
-                    className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
-                    title="Bold (**text**)"
-                  >
-                    <Bold className="w-4 h-4 text-gray-700" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyTextFormatting('italic')}
-                    className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
-                    title="Italic (*text*)"
-                  >
-                    <Italic className="w-4 h-4 text-gray-700" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyTextFormatting('underline')}
-                    className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
-                    title="Underline (__text__)"
-                  >
-                    <Underline className="w-4 h-4 text-gray-700" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyTextFormatting('highlight')}
-                    className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
-                    title="Highlight (==text==)"
-                  >
-                    <Highlighter className="w-4 h-4 text-gray-700" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyTextFormatting('bullet')}
-                    className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
-                    title="Bullet Points (• text)"
-                  >
-                    <List className="w-4 h-4 text-gray-700" />
-                  </button>
-                </div>
-              )}
-              
-              {/* Simple Textarea */}
-              <textarea
-                id={`textarea-${pageNumber}`}
-                value={localData.text_content || ''}
-                onChange={(e) => handleInputChange('text_content', e.target.value)}
-                placeholder="Enter your text content here. Use the formatting buttons above to style selected text."
-                rows={8}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
-                style={{ direction: 'ltr', textAlign: 'left' }}
-                disabled={!isEditable}
-              />
-              
-              <div className="mt-2 text-xs text-gray-500 space-y-1">
-                <p>Formatting guide: **bold**, *italic*, __underline__, ==highlight==, • bullet points</p>
-                <p>Select text and use formatting buttons, or type the formatting directly</p>
-              </div>
-            </>
-          ) : (
-            <div className="min-h-32 p-4 border border-gray-300 rounded-lg bg-gray-50">
-              {renderFormattedText(localData.text_content || '')}
-            </div>
-          )}
-        </div>
-
-        {/* Images Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Text Editor Section */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-            <ImageIcon className="w-4 h-4 mr-2" />
-            Images (Optional)
-            {renderTooltip('Upload images to support your content (max 5MB each)')}
+            <FileText className="w-4 h-4 mr-2" />
+            Text Content
+            {renderTooltip('Add your text content for this page')}
           </label>
           
-          {/* Existing Images */}
-          {(localData.images || []).length > 0 && (
-            <div className="space-y-3 mb-4">
-              {(localData.images || []).map((image, index) => (
-                <div key={index} className="flex items-center space-x-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
-                  <img src={image} alt={`Image ${index + 1}`} className="w-16 h-16 object-cover rounded" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Image {index + 1}</p>
-                    <p className="text-xs text-gray-500">Click to view full size</p>
-                  </div>
-                  {isEditable && (
-                    <button
-                      onClick={() => removeImage(index)}
-                      className="text-red-600 hover:text-red-800 transition-colors p-1"
-                      title="Remove image"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Upload Area */}
+          {/* Text Formatting Toolbar */}
           {isEditable && (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-red-400 transition-colors">
-              <label className="cursor-pointer">
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-600 mb-1">Click to upload image</p>
-                <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleFileUpload(file);
-                  }}
-                />
-              </label>
+            <div className="mb-3 flex items-center space-x-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <span className="text-xs font-medium text-gray-600">Format:</span>
+              <button
+                type="button"
+                onClick={() => applyTextFormatting('bold')}
+                className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
+                title="Bold"
+              >
+                <Bold className="w-4 h-4 text-gray-700" />
+              </button>
+              <button
+                type="button"
+                onClick={() => applyTextFormatting('italic')}
+                className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
+                title="Italic"
+              >
+                <Italic className="w-4 h-4 text-gray-700" />
+              </button>
+              <button
+                type="button"
+                onClick={() => applyTextFormatting('underline')}
+                className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
+                title="Underline"
+              >
+                <Underline className="w-4 h-4 text-gray-700" />
+              </button>
+              <button
+                type="button"
+                onClick={() => applyTextFormatting('highlight')}
+                className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
+                title="Highlight"
+              >
+                <Highlighter className="w-4 h-4 text-gray-700" />
+              </button>
+              <button
+                type="button"
+                onClick={() => applyTextFormatting('bullet')}
+                className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
+                title="Bullet Points"
+              >
+                <List className="w-4 h-4 text-gray-700" />
+              </button>
             </div>
           )}
-
-          {!isEditable && (localData.images || []).length === 0 && (
-            <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
-              <ImageIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-              <p className="text-gray-500">No images uploaded</p>
-            </div>
-          )}
+          
+          {/* Textarea for editing */}
+          <textarea
+            id={`textarea-${pageNumber}`}
+            value={localData.text_content || ''}
+            onChange={(e) => handleInputChange('text_content', e.target.value)}
+            placeholder="Enter your text content here. Select text and use formatting buttons above."
+            rows={12}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none font-mono text-sm"
+            style={{ direction: 'ltr', textAlign: 'left' }}
+            disabled={!isEditable}
+          />
+          
+          <div className="mt-2 text-xs text-gray-500">
+            <p>Select text and use formatting buttons above to apply styles</p>
+          </div>
         </div>
+
+        {/* Live Preview Section */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+            Live Preview
+            {renderTooltip('See how your formatted text will appear')}
+          </label>
+          
+          <div className="min-h-80 p-4 border border-gray-300 rounded-lg bg-gray-50">
+            {renderFormattedText(localData.text_content || '')}
+          </div>
+        </div>
+      </div>
+
+      {/* Images Section */}
+      <div className="mt-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+          <ImageIcon className="w-4 h-4 mr-2" />
+          Images (Optional)
+          {renderTooltip('Upload images to support your content (max 5MB each)')}
+        </label>
+        
+        {/* Existing Images */}
+        {(localData.images || []).length > 0 && (
+          <div className="space-y-3 mb-4">
+            {(localData.images || []).map((image, index) => (
+              <div key={index} className="flex items-center space-x-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                <img src={image} alt={`Image ${index + 1}`} className="w-16 h-16 object-cover rounded" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Image {index + 1}</p>
+                  <p className="text-xs text-gray-500">Click to view full size</p>
+                </div>
+                {isEditable && (
+                  <button
+                    onClick={() => removeImage(index)}
+                    className="text-red-600 hover:text-red-800 transition-colors p-1"
+                    title="Remove image"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Upload Area */}
+        {isEditable && (
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-red-400 transition-colors">
+            <label className="cursor-pointer">
+              <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-600 mb-1">Click to upload image</p>
+              <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFileUpload(file);
+                }}
+              />
+            </label>
+          </div>
+        )}
+
+        {!isEditable && (localData.images || []).length === 0 && (
+          <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
+            <ImageIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+            <p className="text-gray-500">No images uploaded</p>
+          </div>
+        )}
       </div>
     </div>
   );
