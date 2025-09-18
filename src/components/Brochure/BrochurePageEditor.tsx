@@ -227,7 +227,6 @@ export function BrochurePageEditor({
           
           {/* Rich Text Editor */}
           <div
-            ref={(el) => setTextareaRef(el as any)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 min-h-32 resize-none brochure-editor-content"
             contentEditable={isEditable}
             onInput={(e) => {
@@ -236,9 +235,6 @@ export function BrochurePageEditor({
             }}
             dangerouslySetInnerHTML={{ __html: localData.text_content || '' }}
             style={{
-              direction: 'ltr',
-              textAlign: 'left',
-              unicodeBidi: 'normal',
               outline: 'none',
               whiteSpace: 'pre-wrap',
               wordWrap: 'break-word'
