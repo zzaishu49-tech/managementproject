@@ -226,23 +226,28 @@ export function BrochurePageEditor({
           )}
           
           {/* Rich Text Editor */}
-          <textarea
-            ref={(el) => setTextareaRef(el)}
+          <div
+            ref={(el) => setTextareaRef(el as any)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 min-h-32 resize-none brochure-editor-content"
-            value={localData.text_content || ''}
-            onChange={(e) => handleInputChange('text_content', e.target.value)}
-            placeholder="Enter your text content here..."
-            disabled={!isEditable}
-            dir="ltr"
+            contentEditable={isEditable}
+            onInput={(e) => {
+              const content = e.currentTarget.innerHTML;
+              handleInputChange('text_content', content);
+            }}
+            dangerouslySetInnerHTML={{ __html: localData.text_content || '' }}
             style={{
               direction: 'ltr',
               textAlign: 'left',
-              unicodeBidi: 'normal'
+              unicodeBidi: 'normal',
+              outline: 'none',
+              whiteSpace: 'pre-wrap',
+              wordWrap: 'break-word'
             }}
+            data-placeholder="Enter your text content here..."
           />
           
           <p className="text-xs text-gray-500 mt-1">
-            Write paragraphs, descriptions, and any text content for this page. Select text and use formatting buttons above to style your content.
+            Write paragraphs, descriptions, and any text content for this page. Select text and use formatting buttons above to style your content. Formatting will appear directly in the text area.
           </p>
         </div>
 

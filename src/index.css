@@ -68,6 +68,20 @@
     padding-left: 0.5em !important;
   }
 
+  .brochure-editor-content[contenteditable]:empty:before {
+    content: attr(data-placeholder);
+    color: #9CA3AF;
+    pointer-events: none;
+  }
+
+  .brochure-editor-content[contenteditable] {
+    min-height: 8rem;
+  }
+
+  .brochure-editor-content[contenteditable]:focus {
+    outline: none;
+  }
+
   .slider {
     background: linear-gradient(to right, #10B981 0%, #10B981 var(--value, 0%), #E5E7EB var(--value, 0%), #E5E7EB 100%);
   }
