@@ -3,13 +3,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { BrochurePage, BrochureProject } from '../../types';
 import { BrochurePageEditor } from './BrochurePageEditor';
-import { BrochurePreview } from './BrochurePreview';
 import { PageComments } from './PageComments';
 import { ClientFeedbackReport } from '../Reports/ClientFeedbackReport';
 import { 
   Plus, 
-  Eye, 
-  EyeOff, 
+  Send, 
   Save, 
   ChevronLeft, 
   ChevronRight,
@@ -23,7 +21,6 @@ export function BrochureDesign() {
   const { user } = useAuth();
   const { 
     brochureProjects, 
-    projects,
     createBrochureProject, 
     updateBrochureProject,
     saveBrochurePage,
@@ -32,7 +29,7 @@ export function BrochureDesign() {
 
   const [currentProject, setCurrentProject] = useState<BrochureProject | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  // Live editor only (no preview mode)
   const [pageData, setPageData] = useState<BrochurePage['content']>({});
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -40,39 +37,6 @@ export function BrochureDesign() {
 
   // Get client's brochure projects
   const clientProjects = brochureProjects.filter(project => project.client_id === user?.id);
-
-  // For managers and employees, get the first project or create one if none exists
-  const getOrCreateBrochureProject = () => {
-    if (user?.role === 'client') {
-      return clientProjects[0] || null;
-    }
-    
-    // For managers and employees, use the first available brochure project
-    // or create one for the first available regular project
-    if (brochureProjects.length > 0) {
-      return brochureProjects[0];
-    }
-    
-    // If no brochure projects exist and there are regular projects, create one
-    if (projects.length > 0) {
-      const firstProject = projects[0];
-      const projectId = createBrochureProject(firstProject.client_id, firstProject.client_name);
-      return brochureProjects.find(p => p.id === projectId) || null;
-    }
-    
-    return null;
-  };
-
-  // Auto-select the brochure project for non-client users
-  useEffect(() => {
-    if (!currentProject) {
-      const project = getOrCreateBrochureProject();
-      if (project) {
-        setCurrentProject(project);
-        setCurrentPage(1);
-      }
-    }
-  }, [user, brochureProjects, projects, currentProject]);
 
   // Auto-save functionality with debounce
   const debouncedSave = useCallback(
@@ -180,7 +144,7 @@ export function BrochureDesign() {
     switch (pageNumber) {
       case 1: return 'Project Details';
       case 2: return 'Company Information';
-      default: return `Content Page ${pageNumber - 2}`;
+      default: return Content Page ${pageNumber - 2};
     }
   };
 
@@ -207,89 +171,6 @@ export function BrochureDesign() {
     return !page?.is_locked; // Clients can only edit if page is not locked
   };
   if (!currentProject) {
-    // Only show project selection for clients
-    if (user?.role === 'client') {
-      return (
-        <div className="p-6">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Brochure Design</h2>
-            <p className="text-gray-600">Create and manage your brochure design projects</p>
-          </div>
-
-          {clientProjects.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FileText className="w-12 h-12 text-red-600" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No brochure projects yet</h3>
-              <p className="text-gray-600 mb-6">Create your first brochure design project to get started</p>
-              <button
-                onClick={handleCreateProject}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 mx-auto"
-              >
-                <Plus className="w-5 h-5" />
-                <span>Create New Brochure Project</span>
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-gray-900">Your Brochure Projects</h3>
-                <button
-                  onClick={handleCreateProject}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>New Project</span>
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {clientProjects.map(project => (
-                  <div
-                    key={project.id}
-                    onClick={() => setCurrentProject(project)}
-                    className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md cursor-pointer transition-shadow"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-gray-900">Brochure Project</h4>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        project.status === 'draft' ? 'bg-gray-100 text-gray-800' :
-                        project.status === 'ready_for_design' ? 'bg-blue-100 text-blue-800' :
-                        project.status === 'in_design' ? 'bg-orange-100 text-orange-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
-                        {project.status.replace('_', ' ')}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Created: {new Date(project.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    } else {
-      // For managers and employees, show loading or no projects message
-      return (
-        <div className="p-6">
-          <div className="text-center py-12">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FileText className="w-12 h-12 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No brochure projects available</h3>
-            <p className="text-gray-600">Brochure projects will appear here when clients create them</p>
-          </div>
-        </div>
-      );
-    }
-  }
-
-  // Remove the old project selection UI for clients since we now have single brochure per project
-  if (false) {
     return (
       <div className="p-6">
         <div className="mb-6">
@@ -378,17 +259,7 @@ export function BrochureDesign() {
               <Plus className="w-4 h-4" />
               <span>Add Page</span>
             </button>
-            <button
-              onClick={() => setIsPreviewMode(!isPreviewMode)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                isPreviewMode 
-                  ? 'bg-gray-600 text-white hover:bg-gray-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {isPreviewMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              <span>{isPreviewMode ? 'Edit Mode' : 'Preview Mode'}</span>
-            </button>
+            {/* Preview toggle removed; live editor only */}
           </div>
         </div>
 
@@ -401,7 +272,7 @@ export function BrochureDesign() {
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
               className="h-2 bg-red-600 rounded-full transition-all duration-300"
-              style={{ width: `${calculateProgress()}%` }}
+              style={{ width: ${calculateProgress()}% }}
             />
           </div>
         </div>
@@ -428,14 +299,14 @@ export function BrochureDesign() {
           {currentProject.status === 'draft' && (
             <button
               onClick={handleSubmitProject}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
             >
-              <Save className="w-4 h-4" />
-              <span>Save</span>
+              <Send className="w-4 h-4" />
+              <span>Submit for Design</span>
             </button>
           )}
           
-          {currentProject.status !== 'draft' && user?.role === 'client' && (
+          {currentProject.status !== 'draft' && (
             <button
               onClick={() => setShowFeedbackReport(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
@@ -472,22 +343,13 @@ export function BrochureDesign() {
             </div>
           )}
 
-          {isPreviewMode ? (
-            <BrochurePreview 
-              project={currentProject}
-              pages={getBrochurePages(currentProject.id)}
-              currentPage={currentPage}
-              totalPages={totalPages}
-            />
-          ) : (
-            <BrochurePageEditor
-              projectId={currentProject.id}
-              pageNumber={currentPage}
-              pageData={pageData}
-              onDataChange={setPageData}
-             isEditable={isPageEditable()}
-            />
-          )}
+          <BrochurePageEditor
+            projectId={currentProject.id}
+            pageNumber={currentPage}
+            pageData={pageData}
+            onDataChange={setPageData}
+            isEditable={isPageEditable()}
+          />
 
           {/* Page Navigation */}
           <div className="mt-6 flex items-center justify-between">
@@ -587,7 +449,7 @@ export function BrochureDesign() {
           )}
 
           <PageComments 
-            pageId={`${currentProject.id}-${currentPage}`}
+            pageId={${currentProject.id}-${currentPage}}
             projectId={currentProject.id}
             pageNumber={currentPage}
           />
@@ -595,7 +457,7 @@ export function BrochureDesign() {
       </div>
       
       {/* Feedback Report Modal */}
-      {showFeedbackReport && currentProject && user?.role === 'client' && (
+      {showFeedbackReport && currentProject && (
         <ClientFeedbackReport
           project={currentProject}
           onClose={() => setShowFeedbackReport(false)}
