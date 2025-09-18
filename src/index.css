@@ -75,6 +75,8 @@
     content: attr(data-placeholder);
     color: #9CA3AF;
     font-style: italic;
+    direction: ltr !important;
+    text-align: left !important;
   }
 
   [contenteditable="true"]:focus:before {
@@ -83,6 +85,10 @@
 
   [contenteditable="true"] {
     outline: none;
+    direction: ltr !important;
+    text-align: left !important;
+    unicode-bidi: embed !important;
+    writing-mode: horizontal-tb !important;
   }
 
   [contenteditable="true"] strong {

@@ -235,8 +235,10 @@ export function BrochurePageEditor({
           onInput={handleEditorInput}
           className="w-full min-h-80 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none text-gray-700 leading-relaxed"
           style={{ 
-            direction: 'ltr', 
-            textAlign: 'left',
+            direction: 'ltr !important', 
+            textAlign: 'left !important',
+            unicodeBidi: 'embed',
+            writingMode: 'horizontal-tb',
             whiteSpace: 'pre-wrap',
             wordWrap: 'break-word'
           }}
