@@ -228,7 +228,7 @@ export function BrochurePageEditor({
           {/* Rich Text Editor */}
           <textarea
             ref={(el) => setTextareaRef(el)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 min-h-32 resize-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 min-h-32 resize-none brochure-editor-content"
             value={localData.text_content || ''}
             onChange={(e) => handleInputChange('text_content', e.target.value)}
             placeholder="Enter your text content here..."

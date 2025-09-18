@@ -65,7 +65,7 @@ export function BrochurePageViewer({ page, project }: BrochurePageViewerProps) {
     
     return (
       <div 
-        className="text-gray-700 leading-relaxed"
+        className="text-gray-700 leading-relaxed brochure-editor-content"
         style={{ direction: 'ltr', textAlign: 'left' }}
         dangerouslySetInnerHTML={{ __html: formattedText }}
       />
@@ -105,7 +105,7 @@ export function BrochurePageViewer({ page, project }: BrochurePageViewerProps) {
         {/* Text Content */}
         {content.text_content ? (
           <div className="prose max-w-none">
-            {renderFormattedText(content.text_content)}
+            <div className="brochure-editor-content">{renderFormattedText(content.text_content)}</div>
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
