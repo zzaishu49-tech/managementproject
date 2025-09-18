@@ -122,14 +122,9 @@ export function BrochurePageEditor({
   const handleEditorInput = () => {
     if (!isEditable || !editorRef.current) return;
     
-    // Force text direction after input
-    if (editorRef.current) {
-      editorRef.current.style.direction = 'ltr';
-      editorRef.current.style.textAlign = 'left';
-      editorRef.current.style.unicodeBidi = 'bidi-override';
-    }
-    
-    handleInputChange('text_content', editorRef.current.innerHTML);
+    // Get the plain text content instead of HTML to avoid direction issues
+    const textContent = editorRef.current.innerText || editorRef.current.textContent || '';
+    handleInputChange('text_content', textContent);
   };
 
   const handleFileUpload = (file: File) => {
@@ -241,21 +236,21 @@ export function BrochurePageEditor({
           ref={editorRef}
           contentEditable={isEditable}
           onInput={handleEditorInput}
-          className="w-full min-h-80 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none text-gray-700 leading-relaxed"
+          className="w-full min-h-80 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none text-gray-700 leading-relaxed ltr-text"
           style={{ 
             direction: 'ltr',
             textAlign: 'left',
-            unicodeBidi: 'bidi-override',
+            unicodeBidi: 'normal',
             writingMode: 'horizontal-tb',
             whiteSpace: 'pre-wrap',
             wordWrap: 'break-word',
-            transform: 'scaleX(1)',
-            WebkitTransform: 'scaleX(1)',
-            MozTransform: 'scaleX(1)'
+            fontFamily: 'inherit'
           }}
-          dangerouslySetInnerHTML={{ __html: getDisplayContent() }}
+          suppressContentEditableWarning={true}
           data-placeholder={isEditable ? "Type your content here. Select text and use formatting buttons above to apply styles." : "No content added yet"}
-        />
+        >
+          {localData.text_content || ''}
+        </div>
         
         {isEditable && (
           <div className="mt-2 text-xs text-gray-500">

@@ -87,11 +87,14 @@
     outline: none;
     direction: ltr !important;
     text-align: left !important;
-    unicode-bidi: bidi-override !important;
+    unicode-bidi: normal !important;
     writing-mode: horizontal-tb !important;
-    transform: scaleX(1) !important;
-    -webkit-transform: scaleX(1) !important;
-    -moz-transform: scaleX(1) !important;
+  }
+
+  .ltr-text {
+    direction: ltr !important;
+    text-align: left !important;
+    unicode-bidi: normal !important;
   }
 
   [contenteditable="true"] strong {
