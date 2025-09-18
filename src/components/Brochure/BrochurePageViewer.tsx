@@ -16,61 +16,6 @@ interface BrochurePageViewerProps {
 export function BrochurePageViewer({ page, project }: BrochurePageViewerProps) {
   const content = page.content;
 
-  // Function to render formatted text
-  const renderFormattedText = (text: string) => {
-    if (!text) return null;
-    
-    // Split text into lines and process each line
-    const lines = text.split('\n');
-    const processedLines = lines.map(line => {
-      // Handle bullet points
-      if (line.trim().startsWith('• ')) {
-        return `<li>${line.replace('• ', '')}</li>`;
-      }
-      // Handle bold text
-      line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      // Handle italic text
-      line = line.replace(/\*(.*?)\*/g, '<em>$1</em>');
-      // Handle underline
-      line = line.replace(/__(.*?)__/g, '<u>$1</u>');
-      // Handle highlight
-      line = line.replace(/==(.*?)==/g, '<mark style="background-color: #fef08a;">$1</mark>');
-      
-      return line;
-    });
-    
-    // Group consecutive list items
-    let formattedText = '';
-    let inList = false;
-    
-    processedLines.forEach(line => {
-      if (line.startsWith('<li>')) {
-        if (!inList) {
-          formattedText += '<ul>';
-          inList = true;
-        }
-        formattedText += line;
-      } else {
-        if (inList) {
-          formattedText += '</ul>';
-          inList = false;
-        }
-        formattedText += line + '<br>';
-      }
-    });
-    
-    if (inList) {
-      formattedText += '</ul>';
-    }
-    
-    return (
-      <div 
-        className="text-gray-700 leading-relaxed brochure-editor-content"
-        style={{ direction: 'ltr', textAlign: 'left' }}
-        dangerouslySetInnerHTML={{ __html: formattedText }}
-      />
-    );
-  };
   const getStatusBadge = () => {
     const statusConfig = {
       approved: { icon: CheckCircle, color: 'bg-green-100 text-green-800 border-green-200', text: 'Approved' },
@@ -82,7 +27,7 @@ export function BrochurePageViewer({ page, project }: BrochurePageViewerProps) {
     const Icon = config.icon;
 
     return (
-      <div className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium border ${config.color}`}>
+      <div className={inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium border ${config.color}}>
         <Icon className="w-4 h-4" />
         <span>{config.text}</span>
       </div>
@@ -105,7 +50,9 @@ export function BrochurePageViewer({ page, project }: BrochurePageViewerProps) {
         {/* Text Content */}
         {content.text_content ? (
           <div className="prose max-w-none">
-            <div className="brochure-editor-content">{renderFormattedText(content.text_content)}</div>
+            <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+              {content.text_content}
+            </div>
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
@@ -123,7 +70,7 @@ export function BrochurePageViewer({ page, project }: BrochurePageViewerProps) {
                 <div key={index} className="rounded-lg overflow-hidden shadow-sm border border-gray-200">
                   <img 
                     src={image} 
-                    alt={`Content image ${index + 1}`}
+                    alt={Content image ${index + 1}}
                     className="w-full h-48 object-cover"
                   />
                 </div>
