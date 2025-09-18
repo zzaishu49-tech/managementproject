@@ -69,6 +69,38 @@
     border: none;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   }
+
+  /* Rich text editor styles */
+  [contenteditable="true"]:empty:before {
+    content: attr(data-placeholder);
+    color: #9CA3AF;
+    font-style: italic;
+  }
+
+  [contenteditable="true"]:focus:before {
+    content: none;
+  }
+
+  [contenteditable="true"] {
+    outline: none;
+  }
+
+  [contenteditable="true"] strong {
+    font-weight: bold;
+  }
+
+  [contenteditable="true"] em {
+    font-style: italic;
+  }
+
+  [contenteditable="true"] u {
+    text-decoration: underline;
+  }
+
+  [contenteditable="true"] mark {
+    background-color: #fef08a;
+    padding: 0 2px;
+  }
 }
 
 @layer utilities {
