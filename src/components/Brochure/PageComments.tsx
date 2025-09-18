@@ -50,7 +50,7 @@ export function PageComments({ pageId, projectId, pageNumber }: PageCommentsProp
     switch (pageNumber) {
       case 1: return 'Project Details';
       case 2: return 'Company Info';
-      default: return `Page ${pageNumber - 2}`;
+      default: return Page ${pageNumber - 2};
     }
   };
 
@@ -104,7 +104,7 @@ export function PageComments({ pageId, projectId, pageNumber }: PageCommentsProp
               <div className="flex items-center space-x-2">
                 <User className="w-3 h-3 text-gray-400" />
                 <span className="font-medium text-gray-900 text-xs">{comment.author_name}</span>
-                <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getRoleColor(comment.author_role)}`}>
+                <span className={px-2 py-0.5 text-xs font-medium rounded-full ${getRoleColor(comment.author_role)}}>
                   {comment.author_role}
                 </span>
                 {comment.action_type && (
