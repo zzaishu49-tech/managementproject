@@ -2,6 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
+/* FORCE OVERRIDE ALL EXTERNAL CSS THAT CAUSES MIRRORING */
+* {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: normal !important;
+  writing-mode: horizontal-tb !important;
+  transform: none !important;
+  -webkit-transform: none !important;
+  -moz-transform: none !important;
+  -ms-transform: none !important;
+  -o-transform: none !important;
+}
+
+html {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+body {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+/* FORCE ALL INPUT ELEMENTS */
+input, textarea, [contenteditable] {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: normal !important;
+  writing-mode: horizontal-tb !important;
+  transform: none !important;
+  -webkit-transform: none !important;
+  -moz-transform: none !important;
+  -ms-transform: none !important;
+  -o-transform: none !important;
+  text-orientation: mixed !important;
+  -webkit-text-orientation: mixed !important;
+}
+
+/* OVERRIDE ANY RTL OR TRANSFORM STYLES */
+[dir="rtl"], .rtl {
+  direction: ltr !important;
+}
+
+/* FORCE SPECIFIC CLASSES */
+.text-editor-textarea,
+.brochure-editor-content {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: normal !important;
+  writing-mode: horizontal-tb !important;
+  transform: none !important;
+  -webkit-transform: none !important;
+  -moz-transform: none !important;
+  -ms-transform: none !important;
+  -o-transform: none !important;
+}
+
 @layer base {
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;

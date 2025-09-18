@@ -284,9 +284,16 @@ export function BrochurePageEditor({
                 textAlign: 'left',
                 unicodeBidi: 'normal',
                 writingMode: 'horizontal-tb',
-                transform: 'none'
+                transform: 'none',
+                WebkitTransform: 'none',
+                MozTransform: 'none',
+                msTransform: 'none',
+                OTransform: 'none',
+                textOrientation: 'mixed',
+                WebkitTextOrientation: 'mixed'
               }}
               dir="ltr"
+              lang="en"
             />
           </div>
           
