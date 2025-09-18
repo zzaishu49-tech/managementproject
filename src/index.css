@@ -46,6 +46,31 @@
     padding-left: 0.5em !important;
   }
 
+  /* Force fix for mirrored text */
+  .text-editor-textarea,
+  textarea,
+  [contenteditable] {
+    direction: ltr !important;
+    text-align: left !important;
+    unicode-bidi: normal !important;
+    writing-mode: horizontal-tb !important;
+    transform: none !important;
+    -webkit-transform: none !important;
+    -moz-transform: none !important;
+    -ms-transform: none !important;
+    -o-transform: none !important;
+  }
+
+  /* Override any inherited RTL styles */
+  * {
+    direction: ltr !important;
+  }
+
+  html, body {
+    direction: ltr !important;
+    text-align: left !important;
+  }
+
   .slider {
     background: linear-gradient(to right, #10B981 0%, #10B981 var(--value, 0%), #E5E7EB var(--value, 0%), #E5E7EB 100%);
   }
