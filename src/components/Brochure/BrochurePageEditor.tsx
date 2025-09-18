@@ -29,7 +29,7 @@ export function BrochurePageEditor({
   isEditable = true
 }: BrochurePageEditorProps) {
   const [localData, setLocalData] = useState<BrochurePage['content']>(pageData);
-  const [textareaRef, setTextareaRef] = useState<HTMLTextAreaElement | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     setLocalData(pageData);
@@ -43,9 +43,11 @@ export function BrochurePageEditor({
   };
 
   const applyTextFormatting = (format: string) => {
-    if (!textareaRef || !isEditable) return;
+    if (!isEditable) return;
     
-    const textarea = textareaRef;
+    const textarea = document.getElementById(`textarea-${pageNumber}`) as HTMLTextAreaElement;
+    if (!textarea) return;
+    
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = textarea.value.substring(start, end);
@@ -129,6 +131,60 @@ export function BrochurePageEditor({
     }, 0);
   };
 
+  // Function to render formatted text for preview
+  const renderFormattedText = (text: string) => {
+    if (!text) return null;
+    
+    // Split text into lines and process each line
+    const lines = text.split('\n');
+    const processedLines = lines.map(line => {
+      // Handle bullet points
+      if (line.trim().startsWith('• ')) {
+        return `<li>${line.replace('• ', '')}</li>`;
+      }
+      // Handle bold text
+      line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // Handle italic text
+      line = line.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      // Handle underline
+      line = line.replace(/__(.*?)__/g, '<u>$1</u>');
+      // Handle highlight
+      line = line.replace(/==(.*?)==/g, '<mark style="background-color: #fef08a;">$1</mark>');
+      
+      return line;
+    });
+    
+    // Group consecutive list items
+    let formattedText = '';
+    let inList = false;
+    
+    processedLines.forEach(line => {
+      if (line.startsWith('<li>')) {
+        if (!inList) {
+          formattedText += '<ul>';
+          inList = true;
+        }
+        formattedText += line;
+      } else {
+        if (inList) {
+          formattedText += '</ul>';
+          inList = false;
+        }
+        formattedText += line + '<br>';
+      }
+    });
+    
+    if (inList) {
+      formattedText += '</ul>';
+    }
+    
+    return (
+      <div 
+        className="text-gray-700 leading-relaxed brochure-editor-content"
+        dangerouslySetInnerHTML={{ __html: formattedText }}
+      />
+    );
+  };
   const handleFileUpload = (file: File) => {
     if (!isEditable) return;
     if (file.size > 5 * 1024 * 1024) {
