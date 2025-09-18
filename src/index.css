@@ -75,7 +75,7 @@
     content: attr(data-placeholder);
     color: #9CA3AF;
     font-style: italic;
-    direction: ltr !important;
+    direction: ltr;
     text-align: left !important;
   }
 
