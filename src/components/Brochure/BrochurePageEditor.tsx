@@ -10,7 +10,9 @@ import {
   Italic,
   Underline,
   Highlighter,
-  List
+  List,
+  Eye,
+  Edit
 } from 'lucide-react';
 
 interface BrochurePageEditorProps {
@@ -99,12 +101,10 @@ export function BrochurePageEditor({
         const currentLineIndex = textarea.value.substring(0, start).split('\n').length - 1;
         
         if (selectedText) {
-          // Add bullet to selected lines
           const selectedLines = selectedText.split('\n');
           const bulletedLines = selectedLines.map(line => line.trim() ? `• ${line.replace(/^• /, '')}` : line);
           newText = `${beforeText}${bulletedLines.join('\n')}${afterText}`;
         } else {
-          // Add bullet to current line
           const currentLine = lines[currentLineIndex];
           if (currentLine && !currentLine.trim().startsWith('• ')) {
             lines[currentLineIndex] = `• ${currentLine}`;
@@ -120,48 +120,37 @@ export function BrochurePageEditor({
         return;
     }
     
-    // Update textarea value
     textarea.value = newText;
     handleInputChange('text_content', newText);
     
-    // Restore cursor position
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
   };
 
-  // Function to render formatted text for preview
   const renderFormattedText = (text: string) => {
-    if (!text) return null;
+    if (!text) return <p className="text-gray-500 italic">No content added yet</p>;
     
-    // Split text into lines and process each line
     const lines = text.split('\n');
     const processedLines = lines.map(line => {
-      // Handle bullet points
       if (line.trim().startsWith('• ')) {
         return `<li>${line.replace('• ', '')}</li>`;
       }
-      // Handle bold text
       line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      // Handle italic text
       line = line.replace(/\*(.*?)\*/g, '<em>$1</em>');
-      // Handle underline
       line = line.replace(/__(.*?)__/g, '<u>$1</u>');
-      // Handle highlight
       line = line.replace(/==(.*?)==/g, '<mark style="background-color: #fef08a;">$1</mark>');
-      
       return line;
     });
     
-    // Group consecutive list items
     let formattedText = '';
     let inList = false;
     
     processedLines.forEach(line => {
       if (line.startsWith('<li>')) {
         if (!inList) {
-          formattedText += '<ul>';
+          formattedText += '<ul style="list-style-type: disc; margin-left: 1.5em; padding-left: 0.5em;">';
           inList = true;
         }
         formattedText += line;
@@ -180,11 +169,12 @@ export function BrochurePageEditor({
     
     return (
       <div 
-        className="text-gray-700 leading-relaxed brochure-editor-content"
+        className="text-gray-700 leading-relaxed"
         dangerouslySetInnerHTML={{ __html: formattedText }}
       />
     );
   };
+
   const handleFileUpload = (file: File) => {
     if (!isEditable) return;
     if (file.size > 5 * 1024 * 1024) {
@@ -192,7 +182,6 @@ export function BrochurePageEditor({
       return;
     }
     
-    // In a real app, this would upload to a server
     const url = URL.createObjectURL(file);
     const images = (localData.images || []);
     handleInputChange('images', [...images, url]);
@@ -225,82 +214,93 @@ export function BrochurePageEditor({
       <div className="space-y-6">
         {/* Text Content Section */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-            <FileText className="w-4 h-4 mr-2" />
-            Text Content
-            {renderTooltip('Add your text content for this page')}
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-gray-700 flex items-center">
+              <FileText className="w-4 h-4 mr-2" />
+              Text Content
+              {renderTooltip('Add your text content for this page')}
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowPreview(!showPreview)}
+              className="flex items-center space-x-2 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              {showPreview ? <Edit className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              <span>{showPreview ? 'Edit' : 'Preview'}</span>
+            </button>
+          </div>
           
-          {/* Text Formatting Toolbar */}
-          {isEditable && (
-            <div className="mb-3 flex items-center space-x-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <span className="text-xs font-medium text-gray-600">Format:</span>
-              <button
-                type="button"
-                onClick={() => applyTextFormatting('bold')}
-                className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
-                title="Bold (select text first)"
-              >
-                <Bold className="w-4 h-4 text-gray-700" />
-              </button>
-              <button
-                type="button"
-                onClick={() => applyTextFormatting('italic')}
-                className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
-                title="Italic (select text first)"
-              >
-                <Italic className="w-4 h-4 text-gray-700" />
-              </button>
-              <button
-                type="button"
-                onClick={() => applyTextFormatting('underline')}
-                className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
-                title="Underline (select text first)"
-              >
-                <Underline className="w-4 h-4 text-gray-700" />
-              </button>
-              <button
-                type="button"
-                onClick={() => applyTextFormatting('highlight')}
-                className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
-                title="Highlight (select text first)"
-              >
-                <Highlighter className="w-4 h-4 text-gray-700" />
-              </button>
-              <button
-                type="button"
-                onClick={() => applyTextFormatting('bullet')}
-                className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
-                title="Bullet Points (select text first)"
-              >
-                <List className="w-4 h-4 text-gray-700" />
-              </button>
-              <div className="text-xs text-gray-500 ml-4">
-                Select text and click formatting buttons
+          {!showPreview ? (
+            <>
+              {/* Text Formatting Toolbar */}
+              {isEditable && (
+                <div className="mb-3 flex items-center space-x-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <span className="text-xs font-medium text-gray-600">Format:</span>
+                  <button
+                    type="button"
+                    onClick={() => applyTextFormatting('bold')}
+                    className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
+                    title="Bold (**text**)"
+                  >
+                    <Bold className="w-4 h-4 text-gray-700" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyTextFormatting('italic')}
+                    className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
+                    title="Italic (*text*)"
+                  >
+                    <Italic className="w-4 h-4 text-gray-700" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyTextFormatting('underline')}
+                    className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
+                    title="Underline (__text__)"
+                  >
+                    <Underline className="w-4 h-4 text-gray-700" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyTextFormatting('highlight')}
+                    className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
+                    title="Highlight (==text==)"
+                  >
+                    <Highlighter className="w-4 h-4 text-gray-700" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyTextFormatting('bullet')}
+                    className="p-2 hover:bg-gray-200 rounded transition-colors border border-gray-300"
+                    title="Bullet Points (• text)"
+                  >
+                    <List className="w-4 h-4 text-gray-700" />
+                  </button>
+                </div>
+              )}
+              
+              {/* Simple Textarea */}
+              <textarea
+                id={`textarea-${pageNumber}`}
+                value={localData.text_content || ''}
+                onChange={(e) => handleInputChange('text_content', e.target.value)}
+                placeholder="Enter your text content here. Use the formatting buttons above to style selected text."
+                rows={8}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
+                style={{ direction: 'ltr', textAlign: 'left' }}
+                disabled={!isEditable}
+              />
+              
+              <div className="mt-2 text-xs text-gray-500 space-y-1">
+                <p>Formatting guide: **bold**, *italic*, __underline__, ==highlight==, • bullet points</p>
+                <p>Select text and use formatting buttons, or type the formatting directly</p>
               </div>
+            </>
+          ) : (
+            <div className="min-h-32 p-4 border border-gray-300 rounded-lg bg-gray-50">
+              {renderFormattedText(localData.text_content || '')}
             </div>
           )}
-          
-          {/* Rich Text Editor */}
-          <div
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 min-h-32 resize-none brochure-editor-content"
-            contentEditable={isEditable}
-            onInput={(e) => {
-              const content = e.currentTarget.innerHTML;
-              handleInputChange('text_content', content);
-            }}
-            dangerouslySetInnerHTML={{ __html: localData.text_content || '' }}
-            style={{
-              outline: 'none',
-              whiteSpace: 'pre-wrap',
-              wordWrap: 'break-word'
-            }}
-            data-placeholder="Enter your text content here..."
-          />
-          
-          <p className="text-xs text-gray-500 mt-1">
-            Write paragraphs, descriptions, and any text content for this page. Select text and use formatting buttons above to style your content. Formatting will appear directly in the text area.
-          </p>
         </div>
 
         {/* Images Section */}
@@ -362,18 +362,6 @@ export function BrochurePageEditor({
             </div>
           )}
         </div>
-
-        {/* Help Text */}
-        {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="text-sm font-semibold text-blue-900 mb-2">Page Guidelines:</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Add your main content in the text area above</li>
-            <li>• Use the formatting toolbar to style your text (bold, italic, underline, highlight)</li>
-            <li>• Images are optional but can help illustrate your content</li>
-            <li>• Keep your content clear and concise</li>
-            <li>• You can preview your page using the preview mode</li>
-          </ul>
-        </div> */}
       </div>
     </div>
   );
